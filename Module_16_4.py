@@ -23,19 +23,22 @@ def create_user(user: Users, username: str, age: int) -> str:
     user.username = username
     user.age = age
     users.append(user)
-    for t in user:
-        print(t)
-    return f"User {username} is registered"
+    # for t in user:
+    #     print(t)
+    return f"User {user} is registered"
 
 @app.put("/user/{user_id}/{username}/{age}")
 def update_users(user_id: int, username: str, age = int) ->str:
-    try:
-        edit_user = users[user_id-1]
-        edit_user.username = username
-        edit_user.age = age
-        return f'User {user_id} updated'
-    except IndexError:
-        raise HTTPException(status_code=404, detail="User was not found")
+    if user_id in [t.id for t in users]:
+        count = 0
+        for i in users:
+            if users[count].id == user_id:
+                users[count].username = username
+                users[count].age = age
+                return f'User ID = {users[count]} updated'
+            else: count+=1
+    else: raise HTTPException(status_code=404, detail="User was not found")
+
 
 @app.delete("/user/{user_id}")
 def delete_message(user_id: int) -> str:
@@ -43,10 +46,11 @@ def delete_message(user_id: int) -> str:
         count = 0
         for i in users:
             if i.id == user_id:
+                deleted_user = users[count]
                 break
             else:
                 count+=1
-        print('True')
+        #print('True')
         users.pop(count)
-        return f"Message ID={user_id} deleted!"
+        return f"User {deleted_user} deleted!"
     else: raise HTTPException(status_code=404, detail="User was not found")
