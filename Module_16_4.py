@@ -1,9 +1,12 @@
 from fastapi import FastAPI, status, Body, HTTPException
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from typing import List
 
 app = FastAPI()
 users = []
+
+templates = Jinja2Templates(directory = 'templates')
 
 class Users(BaseModel):
     id: int = None
@@ -19,38 +22,27 @@ def create_user(user: Users, username: str, age: int) -> str:
     if user.id is None:
         user.id = 1
     else:
-        user.id = max((t.id for t in users), default=0) + 1 #max(id_list, default=0) + 1
+        user.id = max((t.id for t in users), default=0) + 1
     user.username = username
     user.age = age
     users.append(user)
-    # for t in user:
-    #     print(t)
-    return f"User {user} is registered"
+    return user
 
 @app.put("/user/{user_id}/{username}/{age}")
 def update_users(user_id: int, username: str, age = int) ->str:
-    if user_id in [t.id for t in users]:
-        count = 0
-        for i in users:
-            if users[count].id == user_id:
-                users[count].username = username
-                users[count].age = age
-                return f'User ID = {users[count]} updated'
-            else: count+=1
-    else: raise HTTPException(status_code=404, detail="User was not found")
+    for user in users:
+        if user.id == user_id:
+            user.id = user_id
+            user.username = username
+            user.age = age
+            return user
+        else: raise HTTPException(status_code=404, detail="User was not found")
 
 
 @app.delete("/user/{user_id}")
 def delete_message(user_id: int) -> str:
-    if user_id in [t.id for t in users]:
-        count = 0
-        for i in users:
-            if i.id == user_id:
-                deleted_user = users[count]
-                break
-            else:
-                count+=1
-        #print('True')
-        users.pop(count)
-        return f"User {deleted_user} deleted!"
+    for user in users:
+        if user.id == user_id:
+            users.pop(user)
+            return user
     else: raise HTTPException(status_code=404, detail="User was not found")
