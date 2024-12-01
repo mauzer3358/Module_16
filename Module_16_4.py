@@ -6,7 +6,6 @@ from typing import List
 app = FastAPI()
 users = []
 
-templates = Jinja2Templates(directory = 'templates')
 
 class Users(BaseModel):
     id: int = None
@@ -26,10 +25,13 @@ def create_user(user: Users, username: str, age: int) -> str:
     user.username = username
     user.age = age
     users.append(user)
-    return user
+    print(user)
+    return f'{user}'
+
+
 
 @app.put("/user/{user_id}/{username}/{age}")
-def update_users(user_id: int, username: str, age = int) ->str:
+def update_users(user_id: int, username: str, age: int) ->str:
     for user in users:
         if user.id == user_id:
             user.id = user_id
